@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews | AI Media Studio</title>
+    <style>
+        body {
+            background-color: aqua;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .review-section {
+            padding: 20px;
+            background-color: white;
+            color: black;
+        }
+
+        .review-section h1, .review-section p {
+            margin: 10px 0;
+        }
+
+        .review-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .review-form input, .review-form textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1em;
+        }
+
+        .review-form button {
+            padding: 10px;
+            font-size: 1em;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                AI Media Studio<sup> TM</sup>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="reviews.html">Reviews</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="review-section">
+            <h1>Customer Reviews</h1>
+            <form class="review-form" id="review-form">
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+                <textarea id="review" name="review" rows="4" placeholder="Your Review" required></textarea>
+                <button type="submit">Submit Review</button>
+            </form>
+            <div id="reviews-container">
+                <!-- Reviews will be displayed here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 AI Media Studio<sup> TM</sup></p>
+    </footer>
+
+    <script>
+        function deleteReview(id) {
+            fetch(`http://localhost:3000/reviews/${id}`, {
+                method: 'DELETE'
+            }).then(() => {
+                loadReviews();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const reviewsContainer = document.getElementById('reviews-container');
+
+            function loadReviews() {
+                fetch('http://localhost:3000/reviews')
+                    .then(response => response.json())
+                    .then(reviews => {
+                        reviewsContainer.innerHTML = '';
+                        reviews.forEach(review => {
+                            const reviewElement = document.createElement('div');
+                            reviewElement.innerHTML = `
+                                <p><strong>${review.name}</strong>: ${review.text}</p>
+                                <button onclick="deleteReview(${review.id})">Delete</button>
+                            `;
+                            reviewsContainer.appendChild(reviewElement);
+                        });
+                    });
+            }
+
+            document.getElementById('review-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const name = document.getElementById('name').value;
+                const review = document.getElementById('review').value;
+
+                fetch('http://localhost:3000/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, text: review })
+                })
+                .then(response => response.json())
+                .then(review => {
+                    loadReviews();
+                    document.getElementById('review-form').reset();
+                });
+            });
+
+            loadReviews();
+        });
+    </script>
+</body>
+</html>
